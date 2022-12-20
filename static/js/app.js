@@ -1,72 +1,73 @@
 // Use the D3 library to read in samples.json from the URL https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json.
 const url = 'https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json'
 
-d3.json(url).then(function sampleData(d) {
+// extract data from json
+var belly_data = d3.json(url).then(d => d);
     
-    // assign dropdown element to variable
-    let dropDown = d3.select('#selDataset');
+// function to initialize page
+function init() {
 
-    // save datasets to variables
-    let names = d.names;
-    let samples = d.samples;
-    let metadata = d.metadata;
+    // access stored data
+    belly_data.then(function(d){
 
-    // for each individual in list of names, add as dropdown menu option
-    names.forEach(individual => {
-        dropDown
-            .append('option')
-            .text(individual)
-            .property('value', individual);
+        // generate options for dropdown menu
+        d.names.forEach(subject => {
+            d3.select('#selDataset')
+                .append('option')
+                .text(subject)
+                .property('value', subject);
+        });
+
+        // plot charts for first name value
+        plotTopTen(d.names[0]);
     });
-
-    // Create a horizontal bar chart with a dropdown menu to display the top 10 OTUs found in that individual.
-    d3.selectAll('#selDataset').on('change', plotOTU(samples, dropDown));
-
-});
-
-// function to plot top 10 OTUs
-function plotOTU(samples, dropDown) {
-
-    // save dropdown value to variable
-    // TO DO: how to capture new selection??
-    let selection = dropDown.property('value');
-
-    // save data for top 10 OTUs
-    let results = samples.filter(individual => individual.id == selection)[0];
-    let sampleIds = results.otu_ids.slice(0,10).reverse();
-    let sampleValues = results.sample_values.slice(0,10).reverse();
-    let sampleLabels = results.otu_labels.slice(0,10).reverse();
-
-    // add OTU prefix to IDs
-    sampleIds = sampleIds.map(id => 'OTU ' + id);
-
-    // specify chart parameters
-    let trace1 = {
-        type: 'bar',
-        orientation: 'h',
-        // Use sample_values as the values for the bar chart.
-        x: sampleValues, 
-        // Use otu_ids as the labels for the bar chart.
-        y: sampleIds, 
-        // Use otu_labels as the hovertext for the chart.
-        text: sampleLabels  
-    };
-
-    let data = [trace1];
-
-    let layout = {
-        title: `Test Subject ${selection}:\n Top 10 OTUs by Sample Value`,
-    };
-
-    console.log(results);    
-    console.log(sampleValues);
-    console.log(sampleIds);
-
-    // plot bar
-    Plotly.newPlot('bar', data, layout);
 };
 
+// initialize page
+init();
 
+// function to plot horizontal bar chart with top 10 OTUs per test subject
+function plotTopTen(value) {
+    
+    console.log('subject id: ' + value);
+
+    // save data to variables
+    belly_data.then(function(d){
+        let results = d.samples.filter(subject => subject.id == value)[0];
+        let sampleIDs = results.otu_ids.slice(0,10).reverse();
+        let sampleValues = results.sample_values.slice(0,10).reverse();
+        let sampleLabels = results.otu_labels.slice(0,10).reverse();
+        
+        // add OTU prefix to IDs
+        sampleIDs = sampleIDs.map(id => 'OTU ' + id);
+        console.log(sampleIDs);
+
+        // set parameters for plot
+        let trace1 = {
+            type: 'bar',
+            orientation: 'h',
+            x: sampleValues,
+            y: sampleIDs,
+            text: sampleLabels
+        };
+
+        let data = [trace1];
+
+        // plot settings
+        let layout = {
+            title: `Test Subject ${value}: Top 10 OTUs by Sample Value`
+        };
+
+        // draw plot
+        Plotly.newPlot('bar', data, layout);
+    });
+};
+
+// function to update charts when dropdown selection changes
+function optionChanged(value) {
+    console.log(value);
+    plotTopTen(value);
+}
 
 
 
