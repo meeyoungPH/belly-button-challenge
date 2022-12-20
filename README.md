@@ -6,6 +6,7 @@ In this project, I use D3 and Plotly to create a custom dashboard for visualizin
 * D3
 * Plotly.JS
 * Bootstrap
+* HTML
 
 ## Analysis and Visualization
 
