@@ -1,6 +1,8 @@
 # Belly Button Challenge
 In this project, I use D3 and Plotly to create a custom dashboard for visualizing bacterial testing results of belly button samples from numerous test subjects. Data are dynamically shown in a bar chart, bubble chart, and gauge along with demographic details about the chosen test subject.
 
+Access the live dashboard on [Github Pages](https://meeyoungph.github.io/belly-button-challenge/).
+
 ## Tools/Libraries
 * Javascript
 * D3
