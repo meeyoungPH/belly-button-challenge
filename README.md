@@ -9,7 +9,7 @@ In this project, I use D3 and Plotly to create a custom dashboard for visualizin
 * Bootstrap
 
 ## Analysis and Visualization
-![screenshot](images/dashboard_956.png)
+![screenshot][def]
 
 ### The following steps were involved in developing the dashboard:
 
@@ -29,3 +29,5 @@ In this project, I use D3 and Plotly to create a custom dashboard for visualizin
 6. Update charts and values when a new test subject is selected in the dropdown menu.
 
 7. Deploy page via Github Pages.
+
+[def]: images/dashboard_956.png
