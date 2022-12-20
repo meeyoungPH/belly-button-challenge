@@ -18,9 +18,12 @@ function init() {
                 .property('value', subject);
         });
 
-        // plot charts for first name value
-        plotBarTopTen(d.names[0]);
-        plotBubble(d.names[0]);
+        // plot charts for first subject
+        let initId = d.names[0];
+        plotBarTopTen(initId);
+        plotBubble(initId);
+        metadata(initId);
+        plotGauge(initId);
     });
 };
 
@@ -40,8 +43,11 @@ function plotBarTopTen(name) {
         let trace1 = {
             type: 'bar',
             orientation: 'h',
+            // use the top 10 sample values for the x values
             x: results.sample_values.slice(0,10).reverse(),
+            // use the top 10 OTU ids for the y values
             y: results.otu_ids.slice(0,10).reverse().map(id => 'OTU ' + id),
+            // use the OTU labels for the text values
             text: results.otu_labels.slice(0,10).reverse(),
             marker: {
                 color: results.otu_ids.slice(0,10).reverse()
@@ -66,15 +72,19 @@ function plotBubble(name) {
     // save data to variables for chart
     belly_data.then(function(d) {
         let results = d.samples.filter(subject => subject.id == name)[0];
-        console.log(results.sample_values);
 
         let trace1 = {
+            // Use otu_ids for the x values.
             x: results.otu_ids,
+            // Use sample_values for the y values.
             y: results.sample_values,
+            // Use otu_labels for the text values.
             text: results.otu_labels,
             mode: 'markers',
             marker: {
+                // Use sample_values for the marker size.
                 size: results.sample_values.map(value => Math.sqrt(value)*8),
+                // Use otu_ids for the marker colors.
                 color: results.otu_ids
             }
         };
@@ -90,72 +100,61 @@ function plotBubble(name) {
     });
 };
 
+// display the sample metadata for the chosen test subject
+function metadata(name) {
+    // clear demographic info box of any content
+    d3.select('#sample-metadata')
+        .selectAll('p')
+        .remove();
 
+    // access metadata
+    belly_data.then(function(d) {
+        let results = d.metadata.filter(subject => subject.id == name)[0];
 
+        // loop through dictionary pairs
+        for (const [key, value] of Object.entries(results)) {
+            
+            // append each key-value pair to the demographic info box
+            d3.select('#sample-metadata')
+                .append('p')
+                .text(`${key}: ${value}`)
+                .property('value', value)
+        };
+    });
+};
 
+// display the wash frequency of the test subject
+function plotGauge(name) {
+    
+    // access the wash frequency data from the metadata
+    belly_data.then(function(d) {
+        let results = d.metadata.filter(subject => subject.id == name)[0];
+        
+        // color range
+        let colorRange = ['red', 'red', 'red', 'orange', 'orange', 'yellow', 'yellow', 'green', 'green', 'green']
 
-// Use otu_ids for the x values.
+        // parameters for gauge
+        let data = [{
+            title: {text: 'Wash Frequency'},
+            type: 'indicator',
+            mode: 'gauge+number',
+            gauge: {
+                axis: {range: [null, 9]},
+                bar: {color: colorRange[results.wfreq]}
+            },
+            // wash frequency value
+            value: results.wfreq    
+        }];
 
-// Use sample_values for the y values.
-
-// Use sample_values for the marker size.
-
-// Use otu_ids for the marker colors.
-
-// Use otu_labels for the text values.
-
-// Bubble Chart
-// Display the sample metadata, i.e., an individual's demographic information.
-
-// Display each key-value pair from the metadata JSON object somewhere on the page.
+        // draw gauge
+        Plotly.newPlot('gauge',data);
+    });
+};
 
 // function to update charts when dropdown selection changes
 function optionChanged(name) {
     plotBarTopTen(name);
     plotBubble(name);
+    metadata(name);
+    plotGauge(name);
 };
-
-// hw
-// Update all the plots when a new sample is selected. Additionally, you are welcome to create any layout that you would like for your dashboard. An example dashboard is shown as follows:
-
-// hw
-// Deploy your app to a free static page hosting service, such as GitHub Pages. Submit the links to your deployment and your GitHub repo. Ensure that your repository has regular commits and a thorough README.md file
-
-// Advanced Challenge Assignment (Optional with no extra points earning)
-// The following task is advanced and therefore optional.
-
-// Adapt the Gauge Chart from https://plot.ly/javascript/gauge-charts/ Links to an external site.to plot the weekly washing frequency of the individual.
-
-// You will need to modify the example gauge code to account for values ranging from 0 through 9.
-
-// Update the chart whenever a new sample is selected.
-
-// Weekly Washing Frequency Gauge
-// Hints
-// Use console.log inside of your JavaScript code to see what your data looks like at each step.
-
-// Refer to the Plotly.js documentation Links to an external site.when building the plots.
-
-// Requirements
-
-// Bubble Charts (40 points)
-// Chart initializes without error (10 points)
-
-// Chart updates when a new sample is selected (5 points)
-
-// Chart uses otu_ids for the x values (5 points)
-
-// Chart uses otu_ids for marker colors (5 points)
-
-// Chart uses sample_values for the y values (5 points)
-
-// Chart uses sample_values for the marker size (5 points)
-
-// Chart uses `otu_labels for text values (5 points)
-
-// Metadata and Deployment (30 points)
-// Metadata initializes without error (10 points)
-
-// Metadata updates when a new sample is selected (10 points)
-
-// App Successfully Deployed to Github Pages (10 points)
