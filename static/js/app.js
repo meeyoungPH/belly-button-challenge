@@ -19,43 +19,40 @@ function init() {
         });
 
         // plot charts for first name value
-        plotTopTen(d.names[0]);
+        plotBarTopTen(d.names[0]);
+        plotBubble(d.names[0]);
     });
 };
 
 // initialize page
 init();
 
-// function to plot horizontal bar chart with top 10 OTUs per test subject
-function plotTopTen(value) {
+// plot horizontal bar chart with top 10 OTUs per test subject
+function plotBarTopTen(name) {
     
-    console.log('subject id: ' + value);
+    console.log('subject id: ' + name);
 
-    // save data to variables
+    // save data to variables for chart
     belly_data.then(function(d){
-        let results = d.samples.filter(subject => subject.id == value)[0];
-        let sampleIDs = results.otu_ids.slice(0,10).reverse();
-        let sampleValues = results.sample_values.slice(0,10).reverse();
-        let sampleLabels = results.otu_labels.slice(0,10).reverse();
-        
-        // add OTU prefix to IDs
-        sampleIDs = sampleIDs.map(id => 'OTU ' + id);
-        console.log(sampleIDs);
+        let results = d.samples.filter(subject => subject.id == name)[0];
 
         // set parameters for plot
         let trace1 = {
             type: 'bar',
             orientation: 'h',
-            x: sampleValues,
-            y: sampleIDs,
-            text: sampleLabels
+            x: results.sample_values.slice(0,10).reverse(),
+            y: results.otu_ids.slice(0,10).reverse().map(id => 'OTU ' + id),
+            text: results.otu_labels.slice(0,10).reverse(),
+            marker: {
+                color: results.otu_ids.slice(0,10).reverse()
+            }
         };
 
         let data = [trace1];
 
         // plot settings
         let layout = {
-            title: `Test Subject ${value}: Top 10 OTUs by Sample Value`
+            title: `Test Subject ${name}: Top 10 OTUs by Sample Value`
         };
 
         // draw plot
@@ -63,18 +60,39 @@ function plotTopTen(value) {
     });
 };
 
-// function to update charts when dropdown selection changes
-function optionChanged(value) {
-    console.log(value);
-    plotTopTen(value);
-}
+// create a bubble chart that displays each sample
+function plotBubble(name) {
+
+    // save data to variables for chart
+    belly_data.then(function(d) {
+        let results = d.samples.filter(subject => subject.id == name)[0];
+        console.log(results.sample_values);
+
+        let trace1 = {
+            x: results.otu_ids,
+            y: results.sample_values,
+            text: results.otu_labels,
+            mode: 'markers',
+            marker: {
+                size: results.sample_values.map(value => Math.sqrt(value)*8),
+                color: results.otu_ids
+            }
+        };
+
+        let data = [trace1];
+
+        let layout = {
+            title: `Test Subject ${name}: Sample size by OTU ID `
+        }; 
+
+        // draw plot
+        Plotly.newPlot('bubble', data, layout);
+    });
+};
 
 
 
 
-
-// bar Chart
-// Create a bubble chart that displays each sample.
 
 // Use otu_ids for the x values.
 
@@ -90,6 +108,12 @@ function optionChanged(value) {
 // Display the sample metadata, i.e., an individual's demographic information.
 
 // Display each key-value pair from the metadata JSON object somewhere on the page.
+
+// function to update charts when dropdown selection changes
+function optionChanged(name) {
+    plotBarTopTen(name);
+    plotBubble(name);
+};
 
 // hw
 // Update all the plots when a new sample is selected. Additionally, you are welcome to create any layout that you would like for your dashboard. An example dashboard is shown as follows:
@@ -113,16 +137,6 @@ function optionChanged(value) {
 // Refer to the Plotly.js documentation Links to an external site.when building the plots.
 
 // Requirements
-// Bar Chart (30 points)
-// Chart initializes without error (10 points)
-
-// Chart updates when a new sample is selected (5 points)
-
-// Chart uses Top 10 sample values as values (5 points)
-
-// Chart uses otu_ids as the labels (5 points)
-
-// Chart uses otu_labels as the tooltip (5 points)
 
 // Bubble Charts (40 points)
 // Chart initializes without error (10 points)
